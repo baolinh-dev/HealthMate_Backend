@@ -49,20 +49,14 @@ const checkAdmin = (req, res, next) => {
     return res.status(403).json({ message: 'No token provided.' });
   }
 
-  // Tách 'Bearer' khỏi token
   const tokenParts = token.split(' ');
   if (tokenParts.length !== 2 || tokenParts[0] !== 'Bearer') {
     return res.status(403).json({ message: 'Invalid token format.' });
   }
 
-  const actualToken = tokenParts[1]; // Lấy phần token
+  const actualToken = tokenParts[1]; 
 
-  console.log('Token:', actualToken); // Log token đã tách
-
-  // Giải mã token
   jwt.verify(actualToken, SECRET_KEY, (err, decoded) => {
-    console.log('Decoded:', decoded); // Kiểm tra kết quả decode
-
     if (err) {
       return res.status(403).json({ message: 'Failed to authenticate token.' });
     }
@@ -70,8 +64,7 @@ const checkAdmin = (req, res, next) => {
     if (decoded.role !== 'admin') {
       return res.status(403).json({ message: 'Access denied: Admins only' });
     }
-
-    next(); // Nếu là admin, tiếp tục xử lý
+    next(); 
   });
 };
 
