@@ -3,7 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors'); // Đảm bảo bạn đã require cors
 const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
+const userRoutes = require('./routes/userRoutes'); 
+const exerciseRoutes = require('./routes/exerciseRoutes');
 
 const app = express();
 app.use(express.json());  // Body parser middleware
@@ -22,7 +23,8 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/users', userRoutes); 
+app.use('/api/exercises', exerciseRoutes)
 
 // Port từ environment hoặc mặc định 5004
 const PORT = process.env.PORT || 5004;
