@@ -6,6 +6,7 @@ const exerciseSchema = new mongoose.Schema({
   timePerSet: { type: Number, required: true, min: 5 }, // Tối thiểu 5 phút
   restTimePerSet: { type: Number, required: true, min: 3 }, // Tối thiểu 3 phút
   exerciseImage: { type: String, required: true },
+  caloriesPerSet: { type: Number, required: true, min: 0 }, // Lượng calo tiêu thụ mỗi set
   updatedAt: { type: Date, default: Date.now },
 });
 

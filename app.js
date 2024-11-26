@@ -7,6 +7,7 @@ const userRoutes = require('./routes/userRoutes');
 const exerciseRoutes = require('./routes/exerciseRoutes');
 
 const app = express();
+
 app.use(express.json());  // Body parser middleware
 
 // Cấu hình CORS

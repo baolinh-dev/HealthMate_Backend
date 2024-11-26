@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/userModel');
+const Exercise = require('../models/exerciseModel') 
 
 // Lấy tất cả người dùng
 const getAllUsers = async (req, res) => {
@@ -109,6 +110,40 @@ const editUser = async (req, res) => {
     console.error('Error updating user:', err);
     res.status(500).json({ message: 'An error occurred while updating the user.' });
   }
+}; 
+
+const completeWorkout = async (req, res) => {
+  const { email } = req.params; // Nhận email từ URL params
+  console.log("email", email); // Kiểm tra xem email có được truyền đúng không
+  
+  const { exercise, setsCompleted } = req.body; // Nhận bài tập và số sets từ body
+  
+  if (!exercise || !setsCompleted) {
+    return res.status(400).json({ message: 'Exercise and setsCompleted are required' });
+  }
+  
+  try {
+    const user = await User.findOne({ email }); // Tìm người dùng qua email
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Tính số calo đã đốt cháy từ số sets
+    const caloriesBurned = exercise.caloriesPerSet;
+
+    // Cập nhật workOut của người dùng
+    user.workOut.push({
+      date: new Date(),
+      calories: caloriesBurned,
+    });
+
+    await user.save(); // Lưu thay đổi vào cơ sở dữ liệu
+
+    res.status(200).json({ message: 'Workout completed successfully', user });
+  } catch (err) {
+    res.status(500).json({ message: 'Error completing workout', error: err.message });
+  }
 };
 
-module.exports = { getAllUsers, searchUsers, addUser, deleteUser, editUser };
+module.exports = { getAllUsers, searchUsers, addUser, deleteUser, editUser, completeWorkout  };

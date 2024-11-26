@@ -12,14 +12,21 @@ exports.getExercises = async (req, res) => {
 
 // Thêm bài tập mới
 exports.createExercise = async (req, res) => {
-  const { name, sets, timePerSet, restTimePerSet, exerciseImage } = req.body;
+  const { name, sets, timePerSet, restTimePerSet, exerciseImage, caloriesPerSet } = req.body;
 
-  if (!name || !sets || !timePerSet || !restTimePerSet || !exerciseImage) {
+  if (!name || !sets || !timePerSet || !restTimePerSet || !exerciseImage || !caloriesPerSet) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
   try {
-    const newExercise = new Exercise({ name, sets, timePerSet, restTimePerSet, exerciseImage });
+    const newExercise = new Exercise({
+      name,
+      sets,
+      timePerSet,
+      restTimePerSet,
+      exerciseImage,
+      caloriesPerSet, // Lưu caloriesPerSet
+    });
     await newExercise.save();
     res.status(201).json({ message: 'Exercise created successfully', exercise: newExercise });
   } catch (err) {
