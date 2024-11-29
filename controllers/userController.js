@@ -1,3 +1,5 @@
+require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/userModel');
 const Exercise = require('../models/exerciseModel') 
@@ -144,6 +146,69 @@ const completeWorkout = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Error completing workout', error: err.message });
   }
+}; 
+
+const getCurrentUser = (req, res) => {
+  try {
+    // Sử dụng thông tin người dùng đã được lưu trong middleware `authenticateUser`
+    const user = req.user;
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Trả về thông tin người dùng
+    res.status(200).json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      workOut: user.workOut,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error('Error in getCurrentUser:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}; 
+
+const groupCaloriesByDate = (workOut) => {
+  return workOut.reduce((acc, session) => {
+    const date = new Date(session.date).toISOString().split('T')[0]; // Lấy ngày (YYYY-MM-DD)
+    if (!acc[date]) {
+      acc[date] = 0;
+    }
+    acc[date] += session.calories;
+    return acc;
+  }, {});
 };
 
-module.exports = { getAllUsers, searchUsers, addUser, deleteUser, editUser, completeWorkout  };
+const groupCaloriesByWeek = (workOut) => {
+  return workOut.reduce((acc, session) => {
+    const date = new Date(session.date);
+    const year = date.getFullYear();
+    const week = Math.ceil(((date - new Date(year, 0, 1)) / 86400000 + date.getDay() + 1) / 7); // Số tuần
+    const weekKey = `${year}-W${week}`;
+
+    if (!acc[weekKey]) {
+      acc[weekKey] = 0;
+    }
+    acc[weekKey] += session.calories;
+    return acc;
+  }, {});
+};
+
+const getCaloriesStats = (req, res) => {
+  const { workOut } = req.user; // Dữ liệu workOut lấy từ `req.user`
+
+  const dailyStats = groupCaloriesByDate(workOut);
+  const weeklyStats = groupCaloriesByWeek(workOut);
+
+  res.status(200).json({
+    daily: dailyStats,
+    weekly: weeklyStats,
+  });
+};
+
+
+
+module.exports = { getAllUsers, searchUsers, addUser, deleteUser, editUser, completeWorkout, getCurrentUser, getCaloriesStats };

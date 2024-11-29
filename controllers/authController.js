@@ -1,7 +1,7 @@
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const { SECRET_KEY } = process.env;
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 
 // Đăng ký
@@ -32,8 +32,6 @@ const register = async (req, res) => {
 // Đăng nhập
 const login = async (req, res) => {
   const { email, password } = req.body; 
-  console.log("SECRET_KEY", process.env.SECRET_KEY); 
-  
 
   if (!email || !password) {
     return res.status(400).json({ message: 'Please enter your email and password!' });
