@@ -5,6 +5,7 @@ const cors = require('cors'); // Đảm bảo bạn đã require cors
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes'); 
 const exerciseRoutes = require('./routes/exerciseRoutes');
+const blogRoutes = require('./routes/blogRoutes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes); 
 app.use('/api/exercises', exerciseRoutes)
+app.use('/api/blogs', blogRoutes)
 
 // Port từ environment hoặc mặc định 5004
 const PORT = process.env.PORT || 5004;
