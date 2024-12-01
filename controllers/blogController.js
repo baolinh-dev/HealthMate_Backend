@@ -113,7 +113,33 @@ const getAllBlogsAdmin = async (req, res) => {
     console.error(err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
+}; 
+
+const deleteBlog = async (req, res) => {
+  try {
+    const blogId = req.params.id;
+
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+
+    // Kiểm tra quyền người dùng
+    if (req.user._id.toString() !== blog.authorId.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden: You are not authorized to delete this blog' });
+    }
+
+    // Sử dụng findByIdAndDelete thay vì remove
+    await Blog.findByIdAndDelete(blogId);
+
+    res.status(200).json({
+      message: 'Blog deleted successfully',
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
 };
 
-
-module.exports = { addBlog, updateBlogUser, updateBlogAdmin, getAllBlogs, getAllBlogsAdmin };
+module.exports = { addBlog, updateBlogUser, updateBlogAdmin, getAllBlogs, getAllBlogsAdmin, deleteBlog };
