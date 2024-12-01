@@ -84,7 +84,36 @@ const updateBlogAdmin = async (req, res) => {
     console.error(err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
+}; 
+
+const getAllBlogs = async (req, res) => {
+  try {
+    // Lọc chỉ lấy blog có trạng thái là published
+    const blogs = await Blog.find({ status: 'published' });
+
+    if (!blogs || blogs.length === 0) {
+      return res.status(404).json({ message: 'No published blogs found.' });
+    }
+
+    res.status(200).json({
+      message: 'Blogs retrieved successfully',
+      blogs,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+}; 
+
+const getAllBlogsAdmin = async (req, res) => {
+  try {
+    const blogs = await Blog.find(); // Lấy tất cả các bài blog
+    res.status(200).json({ blogs });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
 };
 
 
-module.exports = { addBlog, updateBlogUser, updateBlogAdmin };
+module.exports = { addBlog, updateBlogUser, updateBlogAdmin, getAllBlogs, getAllBlogsAdmin };
