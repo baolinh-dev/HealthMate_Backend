@@ -207,8 +207,25 @@ const getCaloriesStats = (req, res) => {
     daily: dailyStats,
     weekly: weeklyStats,
   });
+}; 
+
+const searchUserById = async (req, res) => {
+  try {
+    const { id } = req.params; // Lấy `id` từ URL params
+    const user = await User.findById(id); // Tìm user theo ID
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Trả về thông tin raw JSON của user
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error('Error searching user by ID:', error);
+    res.status(500).json({ message: 'Internal Server Error', error });
+  }
 };
 
 
 
-module.exports = { getAllUsers, searchUsers, addUser, deleteUser, editUser, completeWorkout, getCurrentUser, getCaloriesStats };
+module.exports = { getAllUsers, searchUsers, addUser, deleteUser, editUser, completeWorkout, getCurrentUser, getCaloriesStats, searchUserById };

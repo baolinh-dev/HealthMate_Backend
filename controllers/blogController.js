@@ -88,22 +88,16 @@ const updateBlogAdmin = async (req, res) => {
 
 const getAllBlogs = async (req, res) => {
   try {
-    // Lọc chỉ lấy blog có trạng thái là published
-    const blogs = await Blog.find({ status: 'published' });
+    const blogs = await Blog.find({ status: 'published' })  // Tìm tất cả bài blog
+      .populate('authorId', 'name email role')  // Populate thông tin tác giả
+      .exec();
 
-    if (!blogs || blogs.length === 0) {
-      return res.status(404).json({ message: 'No published blogs found.' });
-    }
-
-    res.status(200).json({
-      message: 'Blogs retrieved successfully',
-      blogs,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(200).json({ blogs });  // Trả về danh sách blog với thông tin tác giả
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    res.status(500).json({ message: 'Error fetching blogs' });
   }
-}; 
+};
 
 const getAllBlogsAdmin = async (req, res) => {
   try {
