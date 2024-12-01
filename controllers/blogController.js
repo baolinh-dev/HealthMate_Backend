@@ -161,10 +161,13 @@ const searchBlog = async (req, res) => {
       searchConditions.authorId = authorId; // Tìm kiếm theo tác giả
     }
 
+    // Tìm kiếm blog theo điều kiện đã xác định
     const blogs = await Blog.find(searchConditions);
 
+    // Nếu không có bài viết nào phù hợp, trả về tất cả bài viết
     if (blogs.length === 0) {
-      return res.status(404).json({ message: 'No blogs found matching the search criteria' });
+      const allBlogs = await Blog.find(); // Lấy tất cả bài viết nếu không tìm thấy bài viết nào phù hợp
+      return res.status(200).json({ blogs: allBlogs });
     }
 
     res.status(200).json({ blogs });
@@ -173,6 +176,7 @@ const searchBlog = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
 
 
 module.exports = { addBlog, updateBlogUser, updateBlogAdmin, getAllBlogs, getAllBlogsAdmin, deleteBlog, searchBlog };
