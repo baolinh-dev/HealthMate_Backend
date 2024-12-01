@@ -140,6 +140,39 @@ const deleteBlog = async (req, res) => {
     console.error(err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
+}; 
+
+const searchBlog = async (req, res) => {
+  try {
+    const { query, status, authorId } = req.query;
+
+    // Xây dựng điều kiện tìm kiếm
+    let searchConditions = {};
+
+    if (query) {
+      searchConditions.title = { $regex: query, $options: 'i' }; // Tìm kiếm theo tiêu đề (không phân biệt chữ hoa hay chữ thường)
+    }
+
+    if (status) {
+      searchConditions.status = status; // Tìm kiếm theo trạng thái (published, draft, etc.)
+    }
+
+    if (authorId) {
+      searchConditions.authorId = authorId; // Tìm kiếm theo tác giả
+    }
+
+    const blogs = await Blog.find(searchConditions);
+
+    if (blogs.length === 0) {
+      return res.status(404).json({ message: 'No blogs found matching the search criteria' });
+    }
+
+    res.status(200).json({ blogs });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
 };
 
-module.exports = { addBlog, updateBlogUser, updateBlogAdmin, getAllBlogs, getAllBlogsAdmin, deleteBlog };
+
+module.exports = { addBlog, updateBlogUser, updateBlogAdmin, getAllBlogs, getAllBlogsAdmin, deleteBlog, searchBlog };
