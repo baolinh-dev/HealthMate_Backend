@@ -1,18 +1,17 @@
-const Blog = require('../models/blogModel'); // Đường dẫn model Blog
+const Blog = require('../models/blogModel'); 
 
-// Thêm blog
+
 const addBlog = async (req, res) => {
   try {
     const { title, content, image, status } = req.body;
-    const authorId = req.user._id; // Lấy authorId từ thông tin người dùng đã đăng nhập
+    const authorId = req.user._id; 
 
-    // Tạo blog mới
     const newBlog = new Blog({
       title,
       content,
       image,
       authorId,
-      status: status || 'draft', // Mặc định là 'draft' nếu không truyền
+      status: status || 'draft', 
     });
 
     await newBlog.save();
@@ -23,6 +22,69 @@ const addBlog = async (req, res) => {
   } catch (err) {
     res.status(500).send({ message: 'Server error', error: err.message });
   }
+}; 
+
+
+const updateBlogUser = async (req, res) => {
+  try {
+    const blogId = req.params.id; 
+    const { title, content, image } = req.body; 
+
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+
+    if (req.user._id.toString() !== blog.authorId.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden: You are not authorized to edit this blog' });
+    }
+
+    blog.title = title || blog.title;
+    blog.content = content || blog.content;
+    blog.image = image || blog.image;
+
+    await blog.save();
+    res.status(200).json({
+      message: 'Blog updated successfully',
+      blog,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
 };
 
-module.exports = { addBlog };
+const updateBlogAdmin = async (req, res) => {
+  try {
+    const blogId = req.params.id; 
+    const { title, content, image, status } = req.body; 
+
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return res.status(404).json({ message: 'Blog not found' });
+    }
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden: You are not authorized to edit this blog' });
+    }
+
+    blog.title = title || blog.title;
+    blog.content = content || blog.content;
+    blog.image = image || blog.image;
+    blog.status = status || blog.status;
+
+    await blog.save();
+    res.status(200).json({
+      message: 'Blog updated successfully',
+      blog,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+
+module.exports = { addBlog, updateBlogUser, updateBlogAdmin };
