@@ -37,38 +37,5 @@ const addComment = async (req, res) => {
   }
 };
 
-// Lấy danh sách bình luận của một blog
-const getComments = async (req, res) => {
-    try {
-      const { blogId } = req.params;
-  
-      const blog = await Blog.findById(blogId).populate({
-        path: 'comments.userId', // Populate trường userId trong comments
-        select: 'name' // Chỉ lấy trường name từ User
-      });
-  
-      if (!blog) {
-        return res.status(404).json({ message: "Blog không tồn tại." });
-      }
-  
-      res.status(200).json({
-        message: "Lấy bình luận thành công.",
-        comments: blog.comments.map((comment) => ({
-          _id: comment._id,
-          content: comment.content,
-          user: {
-            _id: comment.userId._id, // Lấy _id người dùng
-            name: comment.userId.name, // Lấy name người dùng
-          },
-          createdAt: comment.createdAt,
-        })),
-      });
-    } catch (error) {
-      console.error("Error fetching comments:", error);
-      res.status(500).json({ message: "Có lỗi xảy ra khi lấy bình luận." });
-    }
-  };
-  
-  
 
-module.exports = { addComment, getComments };
+module.exports = { addComment};
