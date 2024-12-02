@@ -1,4 +1,3 @@
-// Blog model
 const mongoose = require('mongoose');
 
 const blogSchema = new mongoose.Schema({
@@ -9,7 +8,7 @@ const blogSchema = new mongoose.Schema({
   status: { type: String, enum: ['draft', 'published', 'archived'], default: 'draft' },
   likes: [{ userId: mongoose.Schema.Types.ObjectId }],
   comments: [{
-    userId: mongoose.Schema.Types.ObjectId,
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Tham chiếu đến User
     content: String,
     createdAt: { type: Date, default: Date.now },
   }],

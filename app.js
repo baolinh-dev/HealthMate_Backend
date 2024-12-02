@@ -6,6 +6,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes'); 
 const exerciseRoutes = require('./routes/exerciseRoutes');
 const blogRoutes = require('./routes/blogRoutes');
+const commentRoutes = require('./routes/commentRoutes');
 
 const app = express();
 
@@ -27,7 +28,8 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes); 
 app.use('/api/exercises', exerciseRoutes)
-app.use('/api/blogs', blogRoutes)
+app.use('/api/blogs', blogRoutes) 
+app.use("/api/comments", commentRoutes)
 
 // Port từ environment hoặc mặc định 5004
 const PORT = process.env.PORT || 5004;

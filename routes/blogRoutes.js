@@ -1,5 +1,5 @@
 const express = require('express');
-const { addBlog, updateBlogUser, updateBlogAdmin, getAllBlogs, getAllBlogsAdmin, deleteBlog, searchBlog } = require('../controllers/blogController');
+const { addBlog, updateBlogUser, updateBlogAdmin, getAllBlogs, getAllBlogsAdmin, deleteBlog, searchBlog, commentBlog } = require('../controllers/blogController');
 const { verifyToken, checkAdmin } = require('../middlewares/authMiddleware');
 
 
@@ -12,5 +12,6 @@ router.get('/all', verifyToken, getAllBlogs);
 router.get('/search', verifyToken, searchBlog);
 router.get('/allAdmin', verifyToken, checkAdmin, getAllBlogsAdmin);
 router.delete('/delete/:id', verifyToken, checkAdmin, deleteBlog); 
+
 
 module.exports = router;

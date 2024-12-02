@@ -90,9 +90,22 @@ const getAllBlogs = async (req, res) => {
   try {
     const blogs = await Blog.find({ status: 'published' })  // Tìm tất cả bài blog
       .populate('authorId', 'name email role')  // Populate thông tin tác giả
+      .populate('comments.userId', 'name') // Populate tên người dùng bình luận
       .exec();
 
-    res.status(200).json({ blogs });  // Trả về danh sách blog với thông tin tác giả
+    // Process the blogs to ensure the 'authorId' and 'comments.userId' are properly formatted
+    const result = blogs.map(blog => ({
+      ...blog.toObject(),
+      author: blog.authorId,  // Add author details to a new 'author' field
+      authorId: undefined,    // Remove the original 'authorId' field
+      comments: blog.comments.map(comment => ({
+        ...comment.toObject(),
+        userId: comment.userId._id,  // Include userId of the commenter
+        userName: comment.userId.name // Add userName for the commenter
+      }))
+    }));
+
+    res.status(200).json({ blogs: result });  // Trả về danh sách blog với thông tin tác giả và người bình luận
   } catch (error) {
     console.error('Error fetching blogs:', error);
     res.status(500).json({ message: 'Error fetching blogs' });
@@ -169,8 +182,6 @@ const searchBlog = async (req, res) => {
     console.error(err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
-};
-
-
+}; 
 
 module.exports = { addBlog, updateBlogUser, updateBlogAdmin, getAllBlogs, getAllBlogsAdmin, deleteBlog, searchBlog };
