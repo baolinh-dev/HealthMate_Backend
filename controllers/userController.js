@@ -7,16 +7,37 @@ const Exercise = require('../models/exerciseModel')
 // Lấy tất cả người dùng
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
+
+    const page = parseInt(req.query.page) > 0 ? parseInt(req.query.page) : 1; // Default page = 1
+    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 10; // Default limit = 10
+    const skip = (page - 1) * limit;
+    const totalItems = await User.countDocuments();
+    const users = await User.find()
+      .skip(skip)
+      .limit(limit);
+
     if (users.length === 0) {
       return res.status(404).json({ message: 'No users found' });
     }
-    res.status(200).json({ users });
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    if (page > totalPages) {
+      return res.status(400).json({ message: 'Page number exceeds total pages' });
+    }
+    res.status(200).json({
+      users,
+      totalPages,
+      totalItems,
+      currentPage: page
+    });
   } catch (err) {
     console.error('Error fetching users:', err);
     res.status(500).json({ message: 'An error occurred while fetching users.' });
   }
 };
+
+
 
 // Tìm kiếm người dùng
 const searchUsers = async (req, res) => {
