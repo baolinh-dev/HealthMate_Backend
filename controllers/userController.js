@@ -7,12 +7,21 @@ const Exercise = require('../models/exerciseModel')
 // Lấy tất cả người dùng
 const getAllUsers = async (req, res) => {
   try {
-
-    const page = parseInt(req.query.page) > 0 ? parseInt(req.query.page) : 1; // Default page = 1
-    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 10; // Default limit = 10
+    const page = parseInt(req.query.page) > 0 ? parseInt(req.query.page) : 1;
+    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 10;
     const skip = (page - 1) * limit;
-    const totalItems = await User.countDocuments();
-    const users = await User.find()
+    const search = req.query.search ? req.query.search.trim() : "";
+
+    // Điều kiện tìm kiếm
+    const searchCondition = search
+      ? { name: { $regex: search, $options: "i" } } // Tìm kiếm theo name
+      : {};
+
+    // Đếm tổng số người dùng phù hợp
+    const totalItems = await User.countDocuments(searchCondition);
+
+    // Lấy danh sách người dùng
+    const users = await User.find(searchCondition)
       .skip(skip)
       .limit(limit);
 
@@ -22,21 +31,21 @@ const getAllUsers = async (req, res) => {
 
     const totalPages = Math.ceil(totalItems / limit);
 
-    if (page > totalPages) {
+    if (page > totalPages && totalPages > 0) {
       return res.status(400).json({ message: 'Page number exceeds total pages' });
     }
+
     res.status(200).json({
       users,
       totalPages,
       totalItems,
-      currentPage: page
+      currentPage: page,
     });
   } catch (err) {
     console.error('Error fetching users:', err);
     res.status(500).json({ message: 'An error occurred while fetching users.' });
   }
 };
-
 
 
 // Tìm kiếm người dùng
