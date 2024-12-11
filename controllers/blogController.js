@@ -114,13 +114,48 @@ const getAllBlogs = async (req, res) => {
 
 const getAllBlogsAdmin = async (req, res) => {
   try {
-    const blogs = await Blog.find(); // Lấy tất cả các bài blog
-    res.status(200).json({ blogs });
+    const page = parseInt(req.query.page) > 0 ? parseInt(req.query.page) : 1; // Default page = 1
+    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 10; // Default limit = 10
+    const skip = (page - 1) * limit;
+    const search = req.query.search ? req.query.search.trim() : ""; // Từ khóa tìm kiếm
+
+    // Tạo điều kiện tìm kiếm
+    const searchCondition = search
+      ? { title: { $regex: search, $options: "i" } } // Tìm kiếm trong trường 'title'
+      : {};
+
+    // Đếm tổng số bài blog phù hợp
+    const totalItems = await Blog.countDocuments(searchCondition);
+
+    // Lấy danh sách bài blog phù hợp với tìm kiếm và phân trang
+    const blogs = await Blog.find(searchCondition)
+      .skip(skip)
+      .limit(limit)
+      .populate("authorId", "name email") // Hiển thị thêm thông tin tác giả (chỉ lấy 'name' và 'email')
+      .sort({ createdAt: -1 }); // Sắp xếp theo thời gian tạo mới nhất
+
+    if (blogs.length === 0) {
+      return res.status(404).json({ message: "No blogs found" });
+    }
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    if (page > totalPages && totalPages > 0) {
+      return res.status(400).json({ message: "Page number exceeds total pages" });
+    }
+
+    res.status(200).json({
+      blogs,
+      totalPages,
+      totalItems,
+      currentPage: page,
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    console.error("Error fetching blogs:", err);
+    res.status(500).json({ message: "An error occurred while fetching blogs." });
   }
-}; 
+};
+
 
 const deleteBlog = async (req, res) => {
   try {
