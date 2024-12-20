@@ -254,8 +254,37 @@ const searchUserById = async (req, res) => {
     console.error('Error searching user by ID:', error);
     res.status(500).json({ message: 'Internal Server Error', error });
   }
+}; 
+
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params; // Lấy `id` từ URL params
+    const user = await User.findById(id); // Tìm người dùng theo ID
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Tính tổng số calo tiêu hao
+    const totalCaloriesBurned = user.workOut.reduce((total, session) => total + session.calories, 0);
+
+    res.status(200).json({
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        workOut: user.workOut,
+      },
+      totalCaloriesBurned, // Trả tổng calo đã tiêu hao
+    });
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
 };
 
 
 
-module.exports = { getAllUsers, searchUsers, addUser, deleteUser, editUser, completeWorkout, getCurrentUser, getCaloriesStats, searchUserById };
+
+module.exports = { getAllUsers, searchUsers, addUser, deleteUser, editUser, completeWorkout, getCurrentUser, getCaloriesStats, searchUserById, getUserById };
